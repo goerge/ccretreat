@@ -63,13 +63,10 @@ public class WordWrap {
 	}
 
 	static String[] alleZeilenAusWortgruppenBauen(String[][] wortgruppen) {
-		List<String> zeilen = new ArrayList<>();
 		final String wortTrenner = " ";
-		for(String[] wortgruppe : wortgruppen){
-			String zeile = String.join(wortTrenner, wortgruppe);
-			zeilen.add(zeile);
-		}
-		return zeilen.toArray(new String[]{});
+		return Arrays.stream(wortgruppen)
+			.map(wortgruppe -> String.join(wortTrenner, wortgruppe))
+			.toArray(String[]::new);
 	}
 
 	static String[] zeilenBauen(String[] worte, int maxLength) {
@@ -80,11 +77,9 @@ public class WordWrap {
 	}
 
 	static String[] zuLangeWorteTrennen(String[] worte, int maximaleZeilenlänge) {
-		List<String> silben = new ArrayList<>();
-		for(String wort : worte){
-			silben.addAll(WordWrap.split(wort, maximaleZeilenlänge));
-		}
-		return silben.toArray(new String[]{});
+		return Stream.of(worte)
+			.flatMap(wort -> split(wort, maximaleZeilenlänge).stream())
+			.toArray(String[]::new);
 	}
 
 	static List<String> split(String wort, int maximaleZeilenlänge) {
