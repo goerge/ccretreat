@@ -16,7 +16,12 @@ public class WordWrapTest {
 	public void textWithSingleLetterLinesWrapsAtLengthOne() {
 		assertThat(umbrechen("a\nb\nc", 1), is("a\nb\nc"));
 	}
-	
+
+	@Test
+	public void challenge() {
+		assertThat(umbrechen("line1 l ine2", 7), is("line1 l\nine2"));
+	}
+
 	@Test
 	public void zeilenAusWortenBauen() {
 		String[] worte = new String[]{"a", "b", "c"};
