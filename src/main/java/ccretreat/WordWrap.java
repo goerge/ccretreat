@@ -24,8 +24,50 @@ public class WordWrap {
 				.toArray(new String[]{});
 	}
 
+	static String[] zuLangeWorteTrennen(String[] worte, int maximaleZeilenlänge) {
+		return Stream.of(worte)
+			.flatMap(wort -> split(wort, maximaleZeilenlänge).stream())
+			.toArray(String[]::new);
+	}
+
+	static String[] zeilenBauen(String[] worte, int maxLength) {
+		List<String> wörter = new ArrayList<>();
+		wörter.addAll(Arrays.asList(worte));
+		String[][] zeilen = worteZusammenfassenProZeile(wörter, maxLength);
+		return alleZeilenAusWortgruppenBauen(zeilen);
+	}
+
 	static String ausgabeTextAufbereiten(String[] zeilen) {
 		return String.join("\n", zeilen);
+	}
+
+	static List<String> split(String wort, int maximaleZeilenlänge) {
+		if(wort.length() <= maximaleZeilenlänge) {
+			return Collections.singletonList(wort);
+		}
+		List<String> silben = new ArrayList<>();
+		int silbenAnzahl = wort.length() / maximaleZeilenlänge;
+		for(int i = 0; i < silbenAnzahl; i++) {
+			silben.add(wort.substring(i * maximaleZeilenlänge, (i + 1) * maximaleZeilenlänge));
+		}
+		silben.add(wort.substring(maximaleZeilenlänge * silbenAnzahl));
+		return silben;
+	}
+
+	static String[][] worteZusammenfassenProZeile(List<String> wortliste, int maxLength) {
+		List<String[]> wortgruppen = new ArrayList<>();
+		while(!wortliste.isEmpty()) {
+			String[] wortgruppe = worteDerZeileBestimmen(wortliste, maxLength);
+			wortgruppen.add(wortgruppe);
+		}
+		return wortgruppen.toArray(new String[][]{});
+	}
+
+	static String[] alleZeilenAusWortgruppenBauen(String[][] wortgruppen) {
+		final String wortTrenner = " ";
+		return Arrays.stream(wortgruppen)
+			.map(wortgruppe -> String.join(wortTrenner, wortgruppe))
+			.toArray(String[]::new);
 	}
 
 	static String[] worteDerZeileBestimmen(List<String> wortliste, int maxLength) {
@@ -51,47 +93,5 @@ public class WordWrap {
 			currentLineLength = newLineLength;
 		}
 		return wortgruppe.toArray(new String[]{});
-	}
-
-	static String[][] worteZusammenfassenProZeile(List<String> wortliste, int maxLength) {
-		List<String[]> wortgruppen = new ArrayList<>();
-		while(!wortliste.isEmpty()) {
-			String[] wortgruppe = worteDerZeileBestimmen(wortliste, maxLength);
-			wortgruppen.add(wortgruppe);
-		}
-		return wortgruppen.toArray(new String[][]{});
-	}
-
-	static String[] alleZeilenAusWortgruppenBauen(String[][] wortgruppen) {
-		final String wortTrenner = " ";
-		return Arrays.stream(wortgruppen)
-			.map(wortgruppe -> String.join(wortTrenner, wortgruppe))
-			.toArray(String[]::new);
-	}
-
-	static String[] zeilenBauen(String[] worte, int maxLength) {
-		List<String> wörter = new ArrayList<>();
-		wörter.addAll(Arrays.asList(worte));
-		String[][] zeilen = worteZusammenfassenProZeile(wörter, maxLength);
-		return alleZeilenAusWortgruppenBauen(zeilen);
-	}
-
-	static String[] zuLangeWorteTrennen(String[] worte, int maximaleZeilenlänge) {
-		return Stream.of(worte)
-			.flatMap(wort -> split(wort, maximaleZeilenlänge).stream())
-			.toArray(String[]::new);
-	}
-
-	static List<String> split(String wort, int maximaleZeilenlänge) {
-		if(wort.length() <= maximaleZeilenlänge) {
-			return Collections.singletonList(wort);
-		}
-		List<String> silben = new ArrayList<>();
-		int silbenAnzahl = wort.length() / maximaleZeilenlänge;
-		for(int i = 0; i < silbenAnzahl; i++) {
-			silben.add(wort.substring(i * maximaleZeilenlänge, (i + 1) * maximaleZeilenlänge));
-		}
-		silben.add(wort.substring(maximaleZeilenlänge * silbenAnzahl));
-		return silben;
 	}
 }
