@@ -87,8 +87,7 @@ public class WordWrapTest {
 
 	@Test
 	public void oneWordPerLine() {
-		List<String> wortliste = new ArrayList<>();
-		wortliste.addAll(Arrays.asList("a", "b", "c"));
+		String[] wortliste = new String[] {"a", "b", "c"};
 		int maxLength = 1;
 
 		String[][] lines = WordWrap.worteZusammenfassenProZeile(wortliste, maxLength);
@@ -99,8 +98,7 @@ public class WordWrapTest {
 
 	@Test
 	public void multipleWordsPerLine() {
-		List<String> wortliste = new ArrayList<>();
-		wortliste.addAll(Arrays.asList("a", "b", "c"));
+		String[] wortliste = new String[]{"a", "b", "c"};
 		int maxLength = 3;
 
 		String[][] lines = WordWrap.worteZusammenfassenProZeile(wortliste, maxLength);

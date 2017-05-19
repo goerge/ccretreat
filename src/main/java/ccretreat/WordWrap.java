@@ -31,9 +31,7 @@ public class WordWrap {
 	}
 
 	static String[] zeilenBauen(String[] worte, int maxLength) {
-		List<String> wörter = new ArrayList<>();
-		wörter.addAll(Arrays.asList(worte));
-		String[][] zeilen = worteZusammenfassenProZeile(wörter, maxLength);
+		String[][] zeilen = worteZusammenfassenProZeile(worte, maxLength);
 		return alleZeilenAusWortgruppenBauen(zeilen);
 	}
 
@@ -54,8 +52,10 @@ public class WordWrap {
 		return silben;
 	}
 
-	static String[][] worteZusammenfassenProZeile(List<String> wortliste, int maxLength) {
-		final List<String[]> wortgruppen = worteZusammenfassenProZeile(wortliste, maxLength, new ArrayList<>());
+	static String[][] worteZusammenfassenProZeile(String[] worte, int maxLength) {
+    List<String> wortliste = new ArrayList<>();
+    wortliste.addAll(Arrays.asList(worte));
+    final List<String[]> wortgruppen = worteZusammenfassenProZeile(wortliste, maxLength, new ArrayList<>());
 		return wortgruppen.toArray(new String[][]{});
 	}
 
