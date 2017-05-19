@@ -55,12 +55,17 @@ public class WordWrap {
 	}
 
 	static String[][] worteZusammenfassenProZeile(List<String> wortliste, int maxLength) {
-		List<String[]> wortgruppen = new ArrayList<>();
-		while(!wortliste.isEmpty()) {
-			String[] wortgruppe = worteDerZeileBestimmen(wortliste, maxLength);
-			wortgruppen.add(wortgruppe);
-		}
+		final List<String[]> wortgruppen = worteZusammenfassenProZeile(wortliste, maxLength, new ArrayList<>());
 		return wortgruppen.toArray(new String[][]{});
+	}
+
+	private	static List<String[]> 	worteZusammenfassenProZeile(List<String> wortliste, int maxLength, List<String[]> wortgruppen) {
+	  if(wortliste.isEmpty()) {
+	    return wortgruppen;
+    }
+    String[] wortgruppe = worteDerZeileBestimmen(wortliste, maxLength);
+    wortgruppen.add(wortgruppe);
+		return worteZusammenfassenProZeile(wortliste, maxLength, wortgruppen);
 	}
 
 	static String[] alleZeilenAusWortgruppenBauen(String[][] wortgruppen) {
