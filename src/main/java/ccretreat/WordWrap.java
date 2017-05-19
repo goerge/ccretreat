@@ -1,102 +1,102 @@
 package ccretreat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.function.Function;
+
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.List;
+import io.vavr.collection.Seq;
 
 public class WordWrap {
 
-	public static String umbrechen(String text, int maxZeilenlänge){
-		String[] wörter = wörterUmbrechen(text);
-    String[] silben = zuLangeWorteTrennen(wörter, maxZeilenlänge);
-    String[] zeilen = zeilenBauen(silben, maxZeilenlänge);
-    String ausgabeText = ausgabeTextAufbereiten(zeilen);
-		return ausgabeText;
-	}
+  public static String umbrechen(String text, int maxZeilenlänge) {
+    List<String> wörter = wörterUmbrechen(text);
+    List<String> silben = zuLangeWorteTrennen(wörter, maxZeilenlänge);
+    Seq<String> zeilen = zeilenBauen(silben, maxZeilenlänge);
+    return ausgabeTextAufbereiten(zeilen);
+  }
 
-	static String[] wörterUmbrechen(String text) {
-		return Stream.of(text.split("\\s"))
-				.filter(s -> !s.isEmpty())
-				.collect(Collectors.toList())
-				.toArray(new String[]{});
-	}
+  static List<String> wörterUmbrechen(String text) {
+    return List.of(text.split("\\s"))
+      .filter(s -> !s.isEmpty());
+  }
 
-	static String[] zuLangeWorteTrennen(String[] worte, int maximaleZeilenlänge) {
-		return Stream.of(worte)
-			.flatMap(wort -> split(wort, maximaleZeilenlänge).stream())
-			.toArray(String[]::new);
-	}
+  static List<String> zuLangeWorteTrennen(List<String> worte, int maximaleZeilenlänge) {
+    return worte
+      .flatMap(wort -> split(wort, maximaleZeilenlänge));
+  }
 
-	static String[] zeilenBauen(String[] worte, int maxLength) {
-		String[][] zeilen = worteZusammenfassenProZeile(worte, maxLength);
-		return alleZeilenAusWortgruppenBauen(zeilen);
-	}
+  static Seq<String> zeilenBauen(List<String> worte, int maxLength) {
+    Seq<Seq<String>> zeilen = worteZusammenfassenProZeile(worte, maxLength);
+    return alleZeilenAusWortgruppenBauen(zeilen);
+  }
 
-	static String ausgabeTextAufbereiten(String[] zeilen) {
-		return String.join("\n", zeilen);
-	}
+  static String ausgabeTextAufbereiten(Seq<String> zeilen) {
+    return String.join("\n", zeilen);
+  }
 
-	static List<String> split(String wort, int maximaleZeilenlänge) {
-		if(wort.length() <= maximaleZeilenlänge) {
-			return Collections.singletonList(wort);
-		}
-		List<String> silben = new ArrayList<>();
-		int silbenAnzahl = wort.length() / maximaleZeilenlänge;
-		for(int i = 0; i < silbenAnzahl; i++) {
-			silben.add(wort.substring(i * maximaleZeilenlänge, (i + 1) * maximaleZeilenlänge));
-		}
-		silben.add(wort.substring(maximaleZeilenlänge * silbenAnzahl));
-		return silben;
-	}
-
-	static String[][] worteZusammenfassenProZeile(String[] worte, int maxLength) {
-    List<String> wortliste = new ArrayList<>();
-    wortliste.addAll(Arrays.asList(worte));
-    final List<String[]> wortgruppen = worteZusammenfassenProZeile(wortliste, maxLength, new ArrayList<>());
-		return wortgruppen.toArray(new String[][]{});
-	}
-
-	private	static List<String[]> 	worteZusammenfassenProZeile(List<String> wortliste, int maxLength, List<String[]> wortgruppen) {
-	  if(wortliste.isEmpty()) {
-	    return wortgruppen;
+  static Seq<String> split(String wort, int maximaleZeilenlänge) {
+    if (wort.length() <= maximaleZeilenlänge) {
+      return List.of(wort);
     }
-    String[] wortgruppe = worteDerZeileBestimmen(wortliste, maxLength);
-    wortgruppen.add(wortgruppe);
-		return worteZusammenfassenProZeile(wortliste, maxLength, wortgruppen);
-	}
+    return List.ofAll(wort.toCharArray())
+      .splitAt(maximaleZeilenlänge)
+      .map(charArrayToString(), charArrayToString())
+      .toSeq()
+      .map(String.class::cast)
+      .flatMap(s -> split(s, maximaleZeilenlänge));
+  }
 
-	static String[] alleZeilenAusWortgruppenBauen(String[][] wortgruppen) {
-		final String wortTrenner = " ";
-		return Arrays.stream(wortgruppen)
-			.map(wortgruppe -> String.join(wortTrenner, wortgruppe))
-			.toArray(String[]::new);
-	}
+  private static Function<io.vavr.collection.List<Character>, String> charArrayToString() {
+    return characters -> characters.foldLeft("", (s, c) -> s + c);
+  }
 
-	static String[] worteDerZeileBestimmen(List<String> wortliste, int maxLength) {
-		final int wordSeparatorLength = 1;
-		List<String> wortgruppe = new ArrayList<>();
-		int currentLineLength = 0;
-		while(!wortliste.isEmpty()){
-			String currentWord = wortliste.get(0);
+  static Seq<Seq<String>> worteZusammenfassenProZeile(List<String> worte, int maxLength) {
+    return worteZusammenfassenProZeile(maxLength, List.empty(), worte);
+  }
 
-			int newLineLength = currentLineLength + currentWord.length();
-			boolean inTheMiddleOfTheLine = currentLineLength > 0;
-			if (inTheMiddleOfTheLine){
-				newLineLength += wordSeparatorLength;
-			}
+  private static Seq<Seq<String>> worteZusammenfassenProZeile(int maxLength, Seq<Seq<String>> wortgruppen, Seq<String> wortliste) {
+    if (wortliste.isEmpty()) {
+      return wortgruppen;
+    }
+    final Tuple2<Seq<String>, Seq<String>> tuple = worteDerZeileBestimmen(wortliste, maxLength);
+    final Seq<String> wortgruppe = tuple._1();
+    return worteZusammenfassenProZeile(maxLength, wortgruppen.append(wortgruppe), tuple._2());
+  }
 
-			boolean lineCompleted = newLineLength > maxLength;
-			if (lineCompleted){
-				break;
-			}
+  static Seq<String> alleZeilenAusWortgruppenBauen(Seq<Seq<String>> wortgruppen) {
+    final String wortTrenner = " ";
+    return wortgruppen
+      .map(wortgruppe -> String.join(wortTrenner, wortgruppe));
+  }
 
-			wortgruppe.add(currentWord);
-			wortliste.remove(0);
-			currentLineLength = newLineLength;
-		}
-		return wortgruppe.toArray(new String[]{});
-	}
+  static Tuple2<Seq<String>, Seq<String>> worteDerZeileBestimmen(Seq<String> wortliste, int maxLength) {
+    final List<String> wortgruppe = List.empty();
+    final int currentLineLength = 0;
+    return worteDerZeileBestimmen(wortliste, maxLength, wortgruppe, currentLineLength);
+  }
+
+  private static Tuple2<Seq<String>, Seq<String>> worteDerZeileBestimmen(Seq<String> wortliste, int maxLength, List<String> wortgruppe,
+                                                                         int currentLineLength) {
+    if (wortliste.isEmpty()) {
+      return Tuple.of(wortgruppe, wortliste);
+    }
+    final String currentWord = wortliste.head();
+    final int newLineLength = newLineLength(currentLineLength, currentWord);
+    boolean lineCompleted = newLineLength > maxLength;
+    if (lineCompleted) {
+      return Tuple.of(wortgruppe, wortliste);
+    }
+    return worteDerZeileBestimmen(wortliste.tail(), maxLength, wortgruppe.append(currentWord), newLineLength);
+  }
+
+  private static int newLineLength(int currentLineLength, String currentWord) {
+    final int wordSeparatorLength = 1;
+    final int newLineLength = currentLineLength + currentWord.length();
+    final boolean inTheMiddleOfTheLine = currentLineLength > 0;
+    if (inTheMiddleOfTheLine) {
+      return newLineLength + wordSeparatorLength;
+    }
+    return newLineLength;
+  }
 }
